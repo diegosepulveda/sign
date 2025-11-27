@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Aby.one Email Signature Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        margin: 0;
+        background: #000;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: white;
+      }
+      .container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 14px;
+      }
+      input {
+        padding: 8px 10px;
+        width: 300px;
+        border-radius: 6px;
+        background: #111;
+        border: 1px solid #333;
+        color: white;
+      }
+      .preview {
+        margin-top: 30px;
+        padding: 20px;
+        background: #0a0a0a;
+        border-radius: 16px;
+        border: 1px solid #222;
+      }
+      textarea {
+        width: 100%;
+        height: 250px;
+        background: #111;
+        color: white;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 12px;
+        margin-top: 20px;
+      }
+      button {
+        margin-top: 10px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        background: white;
+        color: black;
+        cursor: pointer;
+      }
+      button:hover {
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Aby.one — Email Signature Generator</h1>
+
+      <label>
+        Full Name
+        <input id="nameInput" placeholder="Pau Suris" />
+      </label>
+
+      <label>
+        Role / Position
+        <input id="roleInput" placeholder="Co-founder at Aby.one" />
+      </label>
+
+      <div class="preview">
+        <h3>Preview</h3>
+        <div id="signaturePreview"></div>
+      </div>
+
+      <h3>HTML to Copy</h3>
+      <textarea id="htmlOutput"></textarea>
+      <button id="copyBtn">Copy HTML</button>
+    </div>
+
+    <script>
+      const cfg = {
+        avatar: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/char.png",
+        abyLogo: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/aby.svg",
+        youtube: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/y.png",
+        instagram: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/ig.png",
+        xIcon: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/x.png",
+      };
+
+      function buildHTML(name, role) {
+        return `
+<table cellpadding="0" cellspacing="0" style="background:#000;border-radius:20px;padding:20px;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:700px;">
+  <tr>
+    <!-- Avatar -->
+    <td style="width:180px;vertical-align:top;padding-right:20px;">
+      <img src="${
+        cfg.avatar
+      }" width="160" style="border-radius:16px;display:block;">
+    </td>
+
+    <!-- Content -->
+    <td style="vertical-align:top;position:relative;">
+
+      <!-- Top-right Aby logo -->
+      <div style="text-align:right;margin-bottom:10px;">
+        <img src="${cfg.abyLogo}" width="38" style="display:inline-block;">
+      </div>
+
+      <div style="font-size:32px;font-weight:700;margin-bottom:4px;">
+        ${name}
+      </div>
+
+      <div style="font-size:18px;color:#ccc;margin-bottom:12px;">
+        ${role.replace(
+          "Aby.one",
+          '<a href="https://aby.one" style="color:white;text-decoration:underline;">Aby.one</a>'
+        )}
+      </div>
+
+      <div style="border-top:1px solid #333;margin:14px 0;"></div>
+
+      <!-- Social icons row -->
+      <div style="display:flex;gap:22px;align-items:center;margin-bottom:16px;">
+
+        <a href="https://youtube.com/@AbydotOne" style="color:white;text-decoration:none;font-size:15px;display:flex;align-items:center;gap:6px;">
+          <img src="${cfg.youtube}" width="22"> AbydotOne
+        </a>
+
+        <a href="https://instagram.com/get_abyss" style="color:white;text-decoration:none;font-size:15px;display:flex;align-items:center;gap:6px;">
+          <img src="${cfg.instagram}" width="22"> get_abyss
+        </a>
+
+        <a href="https://x.com/abydotone" style="color:white;text-decoration:none;font-size:15px;display:flex;align-items:center;gap:6px;">
+          <img src="${cfg.xIcon}" width="22"> abydotone
+        </a>
+
+      </div>
+
+      <div style="font-size:16px;color:#777;font-style:italic;">
+        Join our newsletter
+      </div>
+
+    </td>
+  </tr>
+</table>
+`;
+      }
+
+      function update() {
+        const name = document.getElementById("nameInput").value || "Pau Suris";
+        const role =
+          document.getElementById("roleInput").value || "Co-founder at Aby.one";
+
+        const html = buildHTML(name, role);
+
+        document.getElementById("signaturePreview").innerHTML = html;
+        document.getElementById("htmlOutput").value =
+          "<html><body>" + html + "</body></html>";
+      }
+
+      document.getElementById("nameInput").addEventListener("input", update);
+      document.getElementById("roleInput").addEventListener("input", update);
+      update();
+
+      document.getElementById("copyBtn").onclick = () => {
+        const textarea = document.getElementById("htmlOutput");
+        textarea.select();
+        document.execCommand("copy");
+      };
+    </script>
+  </body>
+</html>
