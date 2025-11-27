@@ -49,6 +49,7 @@
       }
       button {
         margin-top: 10px;
+        margin-right: 8px;
         padding: 8px 16px;
         border-radius: 6px;
         border: none;
@@ -71,8 +72,8 @@
       </label>
 
       <label>
-        Role / Position
-        <input id="roleInput" placeholder="Co-founder at Aby.one" />
+        Role / Position (before “at Aby.one”)
+        <input id="roleInput" placeholder="Co-founder" />
       </label>
 
       <div class="preview">
@@ -80,9 +81,12 @@
         <div id="signaturePreview"></div>
       </div>
 
-      <h3>HTML to Copy</h3>
+      <h3>HTML to Copy (raw)</h3>
       <textarea id="htmlOutput"></textarea>
-      <button id="copyBtn">Copy HTML</button>
+      <div>
+        <button id="copyRenderedBtn">Copy for Gmail (rendered)</button>
+        <button id="copyBtn">Copy raw HTML</button>
+      </div>
     </div>
 
     <script>
@@ -94,15 +98,20 @@
         xIcon: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/x.png",
       };
 
-      function buildHTML(name, role) {
+      function buildHTML(name, roleBase) {
+        const roleHtml =
+          roleBase +
+          ' at <a href="https://aby.one" style="color:white;text-decoration:underline;">Aby.one</a>';
+
         return `
-<table cellpadding="0" cellspacing="0" style="background:#000;border-radius:20px;padding:20px;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:700px;">
+<table cellpadding="0" cellspacing="0" width="680"
+  style="width:680px;background:#000;border-radius:20px;padding:20px;
+         color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+
   <tr>
     <!-- Avatar -->
     <td style="width:180px;vertical-align:top;padding-right:20px;">
-      <img src="${
-        cfg.avatar
-      }" width="160" style="border-radius:16px;display:block;">
+      <img src="${cfg.avatar}" width="160" style="border-radius:16px;display:block;">
     </td>
 
     <!-- Content -->
@@ -118,32 +127,36 @@
       </div>
 
       <div style="font-size:18px;color:#ccc;margin-bottom:12px;">
-        ${role.replace(
-          "Aby.one",
-          '<a href="https://aby.one" style="color:white;text-decoration:underline;">Aby.one</a>'
-        )}
+        ${roleHtml}
       </div>
 
       <div style="border-top:1px solid #333;margin:14px 0;"></div>
 
-      <!-- Social icons row -->
-      <div style="display:flex;gap:22px;align-items:center;margin-bottom:16px;">
+      <!-- Social icons row (table-based, Gmail-safe) -->
+      <table cellpadding="0" cellspacing="0" style="margin-top:4px;">
+        <tr>
+          <td style="padding-right:24px;">
+            <a href="https://youtube.com/@AbydotOne" style="color:white;text-decoration:none;font-size:15px;white-space:nowrap;">
+              <img src="${cfg.youtube}" width="22" style="vertical-align:middle;margin-right:6px;border:0;">
+              AbydotOne
+            </a>
+          </td>
+          <td style="padding-right:24px;">
+            <a href="https://instagram.com/get_abyss" style="color:white;text-decoration:none;font-size:15px;white-space:nowrap;">
+              <img src="${cfg.instagram}" width="22" style="vertical-align:middle;margin-right:6px;border:0;">
+              get_abyss
+            </a>
+          </td>
+          <td>
+            <a href="https://x.com/abydotone" style="color:white;text-decoration:none;font-size:15px;white-space:nowrap;">
+              <img src="${cfg.xIcon}" width="22" style="vertical-align:middle;margin-right:6px;border:0;">
+              abydotone
+            </a>
+          </td>
+        </tr>
+      </table>
 
-        <a href="https://youtube.com/@AbydotOne" style="color:white;text-decoration:none;font-size:15px;display:flex;align-items:center;gap:6px;">
-          <img src="${cfg.youtube}" width="22"> AbydotOne
-        </a>
-
-        <a href="https://instagram.com/get_abyss" style="color:white;text-decoration:none;font-size:15px;display:flex;align-items:center;gap:6px;">
-          <img src="${cfg.instagram}" width="22"> get_abyss
-        </a>
-
-        <a href="https://x.com/abydotone" style="color:white;text-decoration:none;font-size:15px;display:flex;align-items:center;gap:6px;">
-          <img src="${cfg.xIcon}" width="22"> abydotone
-        </a>
-
-      </div>
-
-      <div style="font-size:16px;color:#777;text-align: end;font-style:italic;">
+      <div style="font-size:16px;color:#777;text-align:right;font-style:italic;margin-top:10px;">
         Join our newsletter
       </div>
 
@@ -155,12 +168,15 @@
 
       function update() {
         const name = document.getElementById("nameInput").value || "Pau Suris";
-        const role =
-          document.getElementById("roleInput").value || "Co-founder at Aby.one";
+        const roleBase =
+          document.getElementById("roleInput").value.trim() || "Co-founder";
 
-        const html = buildHTML(name, role);
+        const html = buildHTML(name, roleBase);
 
+        // Preview
         document.getElementById("signaturePreview").innerHTML = html;
+
+        // Raw HTML for manual use
         document.getElementById("htmlOutput").value =
           "<html><body>" + html + "</body></html>";
       }
@@ -169,10 +185,30 @@
       document.getElementById("roleInput").addEventListener("input", update);
       update();
 
+      // Copy raw HTML from textarea
       document.getElementById("copyBtn").onclick = () => {
         const textarea = document.getElementById("htmlOutput");
+        textarea.focus();
         textarea.select();
         document.execCommand("copy");
+      };
+
+      // Copy rendered signature (for Gmail)
+      document.getElementById("copyRenderedBtn").onclick = () => {
+        const preview = document.getElementById("signaturePreview");
+        const nodeToCopy = preview.firstElementChild || preview;
+
+        const range = document.createRange();
+        range.selectNodeContents(nodeToCopy);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.execCommand("copy");
+        selection.removeAllRanges();
+
+        alert(
+          "Signature copied. Go to Gmail > Settings > Signature and paste."
+        );
       };
     </script>
   </body>
