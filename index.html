@@ -21,7 +21,8 @@
         margin-bottom: 12px;
         font-size: 14px;
       }
-      input {
+      input,
+      select {
         padding: 8px 10px;
         width: 300px;
         border-radius: 6px;
@@ -62,6 +63,7 @@
       }
     </style>
   </head>
+
   <body>
     <div class="container">
       <h1>Aby.one — Email Signature Generator</h1>
@@ -76,6 +78,19 @@
         <input id="roleInput" placeholder="Co-founder" />
       </label>
 
+      <!-- NEW DROPDOWN FOR AVATARS -->
+      <label>
+        Avatar
+        <select id="avatarSelect">
+          <option value="char.png">char.png</option>
+          <option value="Character 1.png">Character 1.png</option>
+          <option value="Character 2.png">Character 2.png</option>
+          <option value="Character 3.png">Character 3.png</option>
+          <option value="Character 4.png">Character 4.png</option>
+          <option value="Character 5.png">Character 5.png</option>
+        </select>
+      </label>
+
       <div class="preview">
         <h3>Preview</h3>
         <div id="signaturePreview"></div>
@@ -83,6 +98,7 @@
 
       <h3>HTML to Copy (raw)</h3>
       <textarea id="htmlOutput"></textarea>
+
       <div>
         <button id="copyRenderedBtn">Copy for Gmail (rendered)</button>
         <button id="copyBtn">Copy raw HTML</button>
@@ -112,56 +128,45 @@
     <!-- LEFT COLUMN : Avatar bottom-aligned -->
     <td valign="bottom" style="width:150px;">
       <img src="${cfg.avatar}"
-           width="120"
+           width="140"
            style="border-radius:14px;display:block;">
     </td>
 
     <!-- RIGHT COLUMN : Inner table for clean layout -->
     <td valign="top" style="padding:10px 14px 10px 0;">
 
-      <!-- INNER TABLE -->
       <table cellpadding="0" cellspacing="0" width="100%">
-
-        <!-- Top-right Aby logo -->
         <tr>
           <td style="text-align:right;padding-bottom:4px;">
-            <img src="${cfg.abyLogo}"
-                 width="28"
-                 style="display:inline-block;">
+            <img src="${cfg.abyLogo}" width="28" style="display:inline-block;">
           </td>
         </tr>
 
-        <!-- Name -->
         <tr>
           <td style="font-size:20px;font-weight:700;padding-bottom:2px;">
             ${name}
           </td>
         </tr>
 
-        <!-- Role -->
         <tr>
           <td style="font-size:14px;color:#ccc;padding-bottom:4px;">
             ${roleHtml}
           </td>
         </tr>
 
-        <!-- Divider -->
         <tr>
           <td style="border-top:1px solid #333;padding-top:6px;padding-bottom:6px;"></td>
         </tr>
 
-        <!-- Social icons -->
         <tr>
           <td>
             <table cellpadding="0" cellspacing="0">
               <tr>
-
                 <td style="padding-right:14px;">
                   <a href="https://youtube.com/@AbydotOne"
                      style="color:white;text-decoration:none;font-size:12px;white-space:nowrap;">
-                    <img src="${cfg.youtube}"
-                         width="16"
-                         style="vertical-align:middle;margin-right:4px;border:0;">
+                    <img src="${cfg.youtube}" width="16"
+                      style="vertical-align:middle;margin-right:4px;border:0;">
                     AbydotOne
                   </a>
                 </td>
@@ -169,9 +174,8 @@
                 <td style="padding-right:14px;">
                   <a href="https://instagram.com/get_abyss"
                      style="color:white;text-decoration:none;font-size:12px;white-space:nowrap;">
-                    <img src="${cfg.instagram}"
-                         width="16"
-                         style="vertical-align:middle;margin-right:4px;border:0;">
+                    <img src="${cfg.instagram}" width="16"
+                      style="vertical-align:middle;margin-right:4px;border:0;">
                     get_abyss
                   </a>
                 </td>
@@ -179,26 +183,22 @@
                 <td>
                   <a href="https://x.com/abydotone"
                      style="color:white;text-decoration:none;font-size:12px;white-space:nowrap;">
-                    <img src="${cfg.xIcon}"
-                         width="16"
-                         style="vertical-align:middle;margin-right:4px;border:0;">
+                    <img src="${cfg.xIcon}" width="16"
+                      style="vertical-align:middle;margin-right:4px;border:0;">
                     abydotone
                   </a>
                 </td>
-
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- Newsletter -->
         <tr>
           <td style="font-size:11px;color:#777;text-align:right;
                      font-style:italic;padding-top:4px;">
             Join our newsletter
           </td>
         </tr>
-
       </table>
     </td>
   </tr>
@@ -211,21 +211,26 @@
         const roleBase =
           document.getElementById("roleInput").value.trim() || "Co-founder";
 
+        // NEW — update avatar dynamically
+        const avatarFile = document.getElementById("avatarSelect").value;
+        cfg.avatar =
+          "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/" + avatarFile;
+
         const html = buildHTML(name, roleBase);
 
-        // Preview
         document.getElementById("signaturePreview").innerHTML = html;
-
-        // Raw HTML for manual use
         document.getElementById("htmlOutput").value =
           "<html><body>" + html + "</body></html>";
       }
 
       document.getElementById("nameInput").addEventListener("input", update);
       document.getElementById("roleInput").addEventListener("input", update);
+      document
+        .getElementById("avatarSelect")
+        .addEventListener("change", update);
+
       update();
 
-      // Copy raw HTML from textarea
       document.getElementById("copyBtn").onclick = () => {
         const textarea = document.getElementById("htmlOutput");
         textarea.focus();
@@ -233,22 +238,21 @@
         document.execCommand("copy");
       };
 
-      // Copy rendered signature (for Gmail)
       document.getElementById("copyRenderedBtn").onclick = () => {
         const preview = document.getElementById("signaturePreview");
         const nodeToCopy = preview.firstElementChild || preview;
 
         const range = document.createRange();
         range.selectNodeContents(nodeToCopy);
+
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
+
         document.execCommand("copy");
         selection.removeAllRanges();
 
-        alert(
-          "Signature copied. Go to Gmail > Settings > Signature and paste."
-        );
+        alert("Signature copied. Paste it into Gmail > Settings > Signature");
       };
     </script>
   </body>
