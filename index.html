@@ -2,13 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Aby.one Email Signature Generator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signature Generator</title>
     <style>
       body {
         margin: 0;
         background: #000;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: sans-serif;
         color: white;
       }
       .container {
@@ -23,43 +22,32 @@
       }
       input,
       select {
-        padding: 8px 10px;
+        padding: 8px;
         width: 300px;
-        border-radius: 6px;
-        background: #111;
-        border: 1px solid #333;
+        background: #222;
+        border: 1px solid #444;
         color: white;
+        border-radius: 4px;
       }
       .preview {
         margin-top: 30px;
         padding: 20px;
-        background: #0a0a0a;
-        border-radius: 16px;
-        border: 1px solid #222;
+        background: #222;
+        border-radius: 10px;
       }
       textarea {
         width: 100%;
-        height: 250px;
+        height: 200px;
         background: #111;
-        color: white;
-        border: 1px solid #333;
-        border-radius: 8px;
-        padding: 12px;
-        font-size: 12px;
+        color: #ccc;
         margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #333;
       }
       button {
         margin-top: 10px;
-        margin-right: 8px;
-        padding: 8px 16px;
-        border-radius: 6px;
-        border: none;
-        background: white;
-        color: black;
+        padding: 10px 20px;
         cursor: pointer;
-      }
-      button:hover {
-        opacity: 0.8;
       }
     </style>
   </head>
@@ -68,26 +56,17 @@
     <div class="container">
       <h1>Aby.one — Email Signature Generator</h1>
 
-      <label>
-        Full Name
-        <input id="nameInput" placeholder="Pau Suris" />
-      </label>
-
-      <label>
-        Role / Position (before “at Aby.one”)
-        <input id="roleInput" placeholder="Co-founder" />
-      </label>
-
-      <!-- NEW DROPDOWN FOR AVATARS -->
-      <label>
-        Avatar
+      <label>Full Name <input id="nameInput" placeholder="Pau Suris" /></label>
+      <label>Role <input id="roleInput" placeholder="Co-founder" /></label>
+      <label
+        >Avatar
         <select id="avatarSelect">
           <option value="char.png">char.png</option>
-          <option value="Character 1.png">Character 1.png</option>
-          <option value="Character 2.png">Character 2.png</option>
-          <option value="Character 3.png">Character 3.png</option>
-          <option value="Character 4.png">Character 4.png</option>
-          <option value="Character 5.png">Character 5.png</option>
+          <option value="character_1.png">Character 1.png</option>
+          <option value="character_2.png">Character 2.png</option>
+          <option value="character_3.png">Character 3.png</option>
+          <option value="character_4.png">Character 4.png</option>
+          <option value="character_5.png">Character 5.png</option>
         </select>
       </label>
 
@@ -96,131 +75,107 @@
         <div id="signaturePreview"></div>
       </div>
 
-      <h3>HTML to Copy (raw)</h3>
+      <h3>HTML to Copy</h3>
       <textarea id="htmlOutput"></textarea>
-
-      <div>
-        <button id="copyRenderedBtn">Copy for Gmail (rendered)</button>
-        <button id="copyBtn">Copy raw HTML</button>
-      </div>
+      <button id="copyRenderedBtn">Copy for Gmail</button>
     </div>
 
     <script>
       const cfg = {
-        avatar: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/char.png",
-        abyLogo: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/aby.svg",
+        base: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/",
+        abyLogo: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/aby.png",
         youtube: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/y.png",
         instagram: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/ig.png",
         xIcon: "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/x.png",
       };
 
-      function buildHTML(name, roleBase) {
+      function buildHTML(name, roleBase, avatarFile) {
         const roleHtml =
           roleBase +
           ' at <a href="https://aby.one" style="color:white;text-decoration:underline;">Aby.one</a>';
+        const avatarUrl = cfg.base + avatarFile;
+
+        // UPDATES:
+        // 1. Total width increased to 420px to fit social icons.
+        // 2. Social icons now use nested tables to physically prevent wrapping.
 
         return `
-<table cellpadding="0" cellspacing="0" width="400"
-  style="width:400px;background:#000;border-radius:20px;color:#fff;
-         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<table width="420" cellpadding="0" cellspacing="0" border="0" style="width:420px; background-color:#000000; border-radius:24px; border-collapse:separate; border-spacing:0; overflow:hidden; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
   <tr>
-
-    <!-- LEFT COLUMN : Avatar bottom-aligned -->
-    <td valign="bottom" style="width:150px;">
-      <img src="${cfg.avatar}"
-           width="140"
-           style="border-radius:14px;display:block;">
+    <td width="150" valign="bottom" style="width:150px; vertical-align:bottom; padding:0; margin:0; line-height:0; background-color:#000000;">
+      <img src="${avatarUrl}" width="140" style="display:block; width:140px; border-radius:14px; margin-left: 5px; margin-bottom: 5px;" alt="Avatar" />
     </td>
 
-    <!-- RIGHT COLUMN : Inner table for clean layout -->
-    <td valign="top" style="padding:10px 14px 10px 0;">
-
-      <table cellpadding="0" cellspacing="0" width="100%">
+    <td width="270" valign="top" style="width:270px; vertical-align:top; padding:20px 20px 10px 0; background-color:#000000;">
+      
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
         <tr>
-          <td style="text-align:right;padding-bottom:4px;">
-            <img src="${cfg.abyLogo}" width="28" style="display:inline-block;">
+          <td align="left" style="font-size:20px; font-weight:800; color:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            <span style="color:#ffffff;">${name}</span>
           </td>
-        </tr>
-
-        <tr>
-          <td style="font-size:20px;font-weight:700;padding-bottom:2px;">
-            ${name}
-          </td>
-        </tr>
-
-        <tr>
-          <td style="font-size:14px;color:#ccc;padding-bottom:4px;">
-            ${roleHtml}
-          </td>
-        </tr>
-
-        <tr>
-          <td style="border-top:1px solid #333;padding-top:6px;padding-bottom:6px;"></td>
-        </tr>
-
-        <tr>
-          <td>
-            <table cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="padding-right:14px;">
-                  <a href="https://youtube.com/@AbydotOne"
-                     style="color:white;text-decoration:none;font-size:12px;white-space:nowrap;">
-                    <img src="${cfg.youtube}" width="16"
-                      style="vertical-align:middle;margin-right:4px;border:0;">
-                    AbydotOne
-                  </a>
-                </td>
-
-                <td style="padding-right:14px;">
-                  <a href="https://instagram.com/get_abyss"
-                     style="color:white;text-decoration:none;font-size:12px;white-space:nowrap;">
-                    <img src="${cfg.instagram}" width="16"
-                      style="vertical-align:middle;margin-right:4px;border:0;">
-                    get_abyss
-                  </a>
-                </td>
-
-                <td>
-                  <a href="https://x.com/abydotone"
-                     style="color:white;text-decoration:none;font-size:12px;white-space:nowrap;">
-                    <img src="${cfg.xIcon}" width="16"
-                      style="vertical-align:middle;margin-right:4px;border:0;">
-                    abydotone
-                  </a>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="font-size:11px;color:#777;text-align:right;
-                     font-style:italic;padding-top:4px;">
-            Join our newsletter
+          <td align="right" valign="top" style="vertical-align:top;">
+            <img src="${cfg.abyLogo}" width="24" style="display:block; border:0;" />
           </td>
         </tr>
       </table>
+
+      <div style="font-size:14px; color:#cccccc; margin-bottom:12px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        ${roleHtml}
+      </div>
+
+      <div style="border-top:1px solid #333333; margin-bottom:12px; height:1px; line-height:1px; font-size:1px;">&nbsp;</div>
+
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          
+          <td style="padding-right:10px;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="padding-right:4px;"><a href="https://youtube.com/@AbydotOne"><img src="${cfg.youtube}" width="16" style="display:block; border:0;"></a></td>
+                <td><a href="https://youtube.com/@AbydotOne" style="color:white; text-decoration:none; font-size:12px;">AbydotOne</a></td>
+              </tr>
+            </table>
+          </td>
+
+          <td style="padding-right:10px;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="padding-right:4px;"><a href="https://instagram.com/get_abyss"><img src="${cfg.instagram}" width="16" style="display:block; border:0;"></a></td>
+                <td><a href="https://instagram.com/get_abyss" style="color:white; text-decoration:none; font-size:12px;">get_abyss</a></td>
+              </tr>
+            </table>
+          </td>
+
+          <td>
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="padding-right:4px;"><a href="https://x.com/abydotone"><img src="${cfg.xIcon}" width="16" style="display:block; border:0;"></a></td>
+                <td><a href="https://x.com/abydotone" style="color:white; text-decoration:none; font-size:12px;">abydotone</a></td>
+              </tr>
+            </table>
+          </td>
+
+        </tr>
+      </table>
+
+      <div style="font-size:11px; color:#666666; text-align:right; font-style:italic; margin-top:8px;">
+        Join our newsletter
+      </div>
+
     </td>
   </tr>
 </table>
-`;
+        `.trim();
       }
 
       function update() {
         const name = document.getElementById("nameInput").value || "Pau Suris";
         const roleBase =
           document.getElementById("roleInput").value.trim() || "Co-founder";
-
-        // NEW — update avatar dynamically
         const avatarFile = document.getElementById("avatarSelect").value;
-        cfg.avatar =
-          "https://pub-dfc80c41a7f644d7bbe512f238ef0813.r2.dev/" + avatarFile;
-
-        const html = buildHTML(name, roleBase);
-
+        const html = buildHTML(name, roleBase, avatarFile);
         document.getElementById("signaturePreview").innerHTML = html;
-        document.getElementById("htmlOutput").value =
-          "<html><body>" + html + "</body></html>";
+        document.getElementById("htmlOutput").value = html;
       }
 
       document.getElementById("nameInput").addEventListener("input", update);
@@ -228,31 +183,18 @@
       document
         .getElementById("avatarSelect")
         .addEventListener("change", update);
-
       update();
-
-      document.getElementById("copyBtn").onclick = () => {
-        const textarea = document.getElementById("htmlOutput");
-        textarea.focus();
-        textarea.select();
-        document.execCommand("copy");
-      };
 
       document.getElementById("copyRenderedBtn").onclick = () => {
         const preview = document.getElementById("signaturePreview");
-        const nodeToCopy = preview.firstElementChild || preview;
-
         const range = document.createRange();
-        range.selectNodeContents(nodeToCopy);
-
+        range.selectNode(preview.querySelector("table"));
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
-
         document.execCommand("copy");
         selection.removeAllRanges();
-
-        alert("Signature copied. Paste it into Gmail > Settings > Signature");
+        alert("Signature copied! Paste into Gmail Settings.");
       };
     </script>
   </body>
